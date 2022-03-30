@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Projects\\TimeTrackerWPF\\TimeTrackerWPF\\TimeTrackerWPF.csproj": {}
+    "C:\\Projects\\TimeTracker\\TimeTrackerWPF\\TimeTrackerWPF.csproj": {}
   },
   "projects": {
-    "C:\\Projects\\TimeTrackerWPF\\TimeTrackerWPF\\TimeTrackerWPF.csproj": {
+    "C:\\Projects\\TimeTracker\\TimeTrackerWPF\\TimeTrackerWPF.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Projects\\TimeTrackerWPF\\TimeTrackerWPF\\TimeTrackerWPF.csproj",
+        "projectUniqueName": "C:\\Projects\\TimeTracker\\TimeTrackerWPF\\TimeTrackerWPF.csproj",
         "projectName": "TimeTrackerWPF",
-        "projectPath": "C:\\Projects\\TimeTrackerWPF\\TimeTrackerWPF\\TimeTrackerWPF.csproj",
+        "projectPath": "C:\\Projects\\TimeTracker\\TimeTrackerWPF\\TimeTrackerWPF.csproj",
         "packagesPath": "C:\\Users\\kitit\\.nuget\\packages\\",
-        "outputPath": "C:\\Projects\\TimeTrackerWPF\\TimeTrackerWPF\\obj\\",
+        "outputPath": "C:\\Projects\\TimeTracker\\TimeTrackerWPF\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\kitit\\AppData\\Roaming\\NuGet\\NuGet.Config",

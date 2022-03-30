@@ -4,14 +4,14 @@
 winexe
 C#
 .cs
-C:\Projects\TimeTrackerWPF\TimeTrackerWPF\obj\Debug\net6.0-windows\
+C:\Projects\TimeTracker\TimeTrackerWPF\obj\Debug\net6.0-windows\
 TimeTrackerWPF
 none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
-C:\Projects\TimeTrackerWPF\TimeTrackerWPF\App.xaml
+C:\Projects\TimeTracker\TimeTrackerWPF\App.xaml
 11407045341
-
+1-1606303973
 5-1629398948
 2071441302494
 MainWindow.xaml;
