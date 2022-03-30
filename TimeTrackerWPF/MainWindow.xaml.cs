@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hardcodet.Wpf.TaskbarNotification;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace TimeTrackerWPF
 {
     public partial class MainWindow : Window
     {
+        //TaskbarIcon tbi = new TaskbarIcon();
+
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool IsIconic(IntPtr hWnd);
@@ -78,6 +81,21 @@ namespace TimeTrackerWPF
                 await Task.Delay(1000);
             }
             
+        }
+
+        private void Close(object sender, RoutedEventArgs e)
+        {
+            Visibility = Visibility.Collapsed;
+        }
+
+        private void Open(object sender, RoutedEventArgs e)
+        {
+            Visibility = Visibility.Visible;
+        }
+
+        private void Exit(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 

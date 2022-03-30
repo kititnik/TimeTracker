@@ -24,3 +24,4 @@ C:\Projects\TimeTrackerWPF\TimeTrackerWPF\bin\Debug\net6.0-windows\MaterialDesig
 C:\Projects\TimeTrackerWPF\TimeTrackerWPF\obj\Debug\net6.0-windows\App.baml
 C:\Projects\TimeTrackerWPF\TimeTrackerWPF\obj\Debug\net6.0-windows\TimeTrackerWPF.csproj.CopyComplete
 C:\Projects\TimeTrackerWPF\TimeTrackerWPF\bin\Debug\net6.0-windows\Newtonsoft.Json.dll
+C:\Projects\TimeTrackerWPF\TimeTrackerWPF\bin\Debug\net6.0-windows\Hardcodet.NotifyIcon.Wpf.dll
