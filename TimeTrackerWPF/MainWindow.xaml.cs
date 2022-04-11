@@ -1,5 +1,4 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,19 +8,18 @@ using System.Windows;
 
 namespace TimeTrackerWPF
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
-        //TaskbarIcon tbi = new TaskbarIcon();
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool IsIconic(IntPtr hWnd);
+        private static extern bool IsIconic(IntPtr hWnd);
 
-        //Лист, в котором хранятся все нужные процессы
-        List<CurrentProcess> _old = new List<CurrentProcess>();
+        //List that stores all the necessary processes
+        private List<CurrentProcess> _old = new List<CurrentProcess>();
 
-        //Лист исключений
-        public List<string> _exceptions = new List<string>
+        //List of exceptions
+        private readonly List<string> _exceptions = new List<string>
         {
             "ApplicationFrameHost",
             "TextInputHost",
@@ -30,57 +28,42 @@ namespace TimeTrackerWPF
 
         public MainWindow()
         {
-            //Инициализируем
             InitializeComponent();
             UpdateProcess();
         }
 
-        //Обновляем список процессов
-        public async void UpdateProcess()
+        //Update list of process
+        private async void UpdateProcess()
         {
             while (true)
             {
-                //Получаем все запущенные процессы
-                Process[] all = Process.GetProcesses();
-                List<CurrentProcess> _new = new List<CurrentProcess>();
+                //Get all processes
+                var all = Process.GetProcesses();
+                var recent = (from item in all where IsCorrect(item) select new CurrentProcess(item.MainWindowTitle, item.Id)).ToList();
 
-                foreach (Process item in all)
-                {
-                    //Провряем, подходит ли процесс: имеется ли интерфейс, есть ли название окна, не явлеятся ли процесс исключением
-                    if (item.MainWindowHandle.ToInt32() != 0 && item.MainWindowTitle != "" && !IsIconic(item.MainWindowHandle) && !_exceptions.Contains(item.ProcessName))
-                    {
-                        //Создаём экземпляр класса CurrentProcess с параметрами как у процесса
-                        CurrentProcess p = new CurrentProcess(item.MainWindowTitle, item.Id);
-                        _new.Add(p);
-                    }
-                }
+                var allCorrect = _old.Concat(recent).ToList();
+                var current = allCorrect.Distinct().ToList();
+                _old = current;
 
-                var everything = _old.Concat(_new).ToList<CurrentProcess>();
-                var _current = everything.Distinct().ToList<CurrentProcess>();
-                _old = _current;
+                var doesntRepeat = allCorrect.Where(item => allCorrect.IndexOf(item) == allCorrect.LastIndexOf(item)).ToList();
 
-                var doesntRepeat = new List<CurrentProcess>();
-
-                foreach (var item in everything)
-                {
-                    if(everything.IndexOf(item) == everything.LastIndexOf(item))
-                    {
-                        doesntRepeat.Add(item);
-                    }
-                }
-
-                var repeats = everything.Except(doesntRepeat).ToList<CurrentProcess>();
+                var repeats = allCorrect.Except(doesntRepeat).ToList();
 
                 foreach (var item in repeats)
                 {
                     item.Time += 1;
                 }
 
-                //Обновляем список
-                listViewProcess.ItemsSource = _current;
+                //Update listview
+                ListViewProcess.ItemsSource = current;
                 await Task.Delay(1000);
             }
-            
+        }
+
+        private bool IsCorrect(Process item)
+        {
+            return item.MainWindowHandle.ToInt32() != 0 && item.MainWindowTitle != "" &&
+                   !IsIconic(item.MainWindowHandle) && !_exceptions.Contains(item.ProcessName);
         }
 
         private void Close(object sender, RoutedEventArgs e)
@@ -101,14 +84,14 @@ namespace TimeTrackerWPF
 
     public class CurrentProcess
     {
-        public string? ProcessName { get; set; }
-        public int Id { get; set; }
+        public string? ProcessName { get; }
+        public int Id { get; }
         public int Time { get; set; }
 
         public CurrentProcess(string? processName, int id)
         {
-            this.ProcessName = processName;
-            this.Id = id;
+            ProcessName = processName;
+            Id = id;
         }
 
         public override bool Equals(object? obj)
@@ -118,8 +101,8 @@ namespace TimeTrackerWPF
                 return false;
             }
 
-            var Process = (CurrentProcess)obj;
-            return Process.Id == Id;
+            var process = (CurrentProcess)obj;
+            return process.Id == Id;
         }
 
         public override int GetHashCode()
@@ -127,5 +110,4 @@ namespace TimeTrackerWPF
             return Id;
         }
     }
-
 }
