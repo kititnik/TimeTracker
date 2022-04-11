@@ -23,15 +23,25 @@
             </tb:TaskbarIcon.ContextMenu>
 
         </tb:TaskbarIcon>
-        <ListView Grid.Column="4" Grid.Row="4" Margin="00,30,00,00" Grid.ColumnSpan="2" Name="listViewProcess" FontFamily="Bahnschrift" FontSize="14" Visibility="Visible" Foreground="#FF5A5A50">
+        <ListView Margin="00,30,00,00" 
+                  Grid.ColumnSpan="2" 
+                  Name="ListViewProcess" 
+                  FontFamily="Bahnschrift" 
+                  FontSize="14" 
+                  Visibility="Visible" 
+                  Foreground="#FF5A5A50" d:DataContext="{d:DesignInstance }">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn Header="Time" Width="100" DisplayMemberBinding="{Binding Time}" />
-                    <GridViewColumn Header="Name" Width="980" DisplayMemberBinding="{Binding ProcessName}" />
+                    <GridViewColumn Header="Time" 
+                                    Width="100" 
+                                    DisplayMemberBinding="{Binding Time}"/>
+                    <GridViewColumn Header="Name" 
+                                    Width="900" 
+                                    DisplayMemberBinding="{Binding ProcessName}"/>
                 </GridView>
             </ListView.View>
         </ListView>
-        <Button x:Name="button" 
+        <Button x:Name="Button" 
             Content="" 
             HorizontalAlignment="Left" 
             Margin="1054,5,0,0" 
