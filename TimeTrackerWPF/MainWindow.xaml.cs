@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -10,7 +11,6 @@ namespace TimeTrackerWPF
 {
     public partial class MainWindow
     {
-
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool IsIconic(IntPtr hWnd);
@@ -35,29 +35,44 @@ namespace TimeTrackerWPF
         //Update list of process
         private async void UpdateProcess()
         {
-            while (true)
+            try
             {
-                //Get all processes
-                var all = Process.GetProcesses();
-                var recent = (from item in all where IsCorrect(item) select new CurrentProcess(item.MainWindowTitle, item.Id)).ToList();
-
-                var allCorrect = _old.Concat(recent).ToList();
-                var current = allCorrect.Distinct().ToList();
-                _old = current;
-
-                var doesntRepeat = allCorrect.Where(item => allCorrect.IndexOf(item) == allCorrect.LastIndexOf(item)).ToList();
-
-                var repeats = allCorrect.Except(doesntRepeat).ToList();
-
-                foreach (var item in repeats)
+                while (true)
                 {
-                    item.Time += 1;
-                }
+                    var all = Process.GetProcesses();
+                    var recent = (from item in all where IsCorrect(item) select new CurrentProcess(item.MainWindowTitle, item.ProcessName)).ToList();
 
-                //Update listview
-                ListViewProcess.ItemsSource = current;
-                await Task.Delay(1000);
+                    var allCorrect = _old.Concat(recent).ToList();
+                    var current = allCorrect.Distinct().ToList();
+                    _old = current;
+
+                    var doesntRepeat = allCorrect.Where(item => allCorrect.IndexOf(item) == allCorrect.LastIndexOf(item)).ToList();
+
+                    var repeats = allCorrect.Except(doesntRepeat).ToList();
+
+                    foreach (var item in repeats)
+                    {
+                        var time = new DateTime();
+                        if (item.StringTime != null)
+                        {
+                            time = DateTime.Parse(item.StringTime);
+                        }
+                        time = time.AddSeconds(1);
+                        item.StringTime = time.ToString("HH:mm:ss");
+                    }
+
+                    //Update listview
+                    ListViewProcess.ItemsSource = current;
+                    await Task.Delay(1000);
+                }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show($"Something went wrong. App will be closed in 10 seconds. If the problem persists, write to me on github, attaching the error code: \n{e}");
+                Thread.Sleep(10000);
+                Close();
+            }
+            
         }
 
         private bool IsCorrect(Process item)
@@ -81,17 +96,17 @@ namespace TimeTrackerWPF
             Close();
         }
     }
-
+    
     public class CurrentProcess
     {
-        public string? ProcessName { get; }
+        public string? ProcessName { get; set; }
         public int Id { get; }
-        public int Time { get; set; }
+        public string? StringTime { get; set; }
 
-        public CurrentProcess(string? processName, int id)
+        public CurrentProcess(string? processName, string id)
         {
             ProcessName = processName;
-            Id = id;
+            Id = id.GetHashCode();
         }
 
         public override bool Equals(object? obj)

@@ -34,7 +34,7 @@
                 <GridView>
                     <GridViewColumn Header="Time" 
                                     Width="100" 
-                                    DisplayMemberBinding="{Binding Time}"/>
+                                    DisplayMemberBinding="{Binding StringTime}"/>
                     <GridViewColumn Header="Name" 
                                     Width="900" 
                                     DisplayMemberBinding="{Binding ProcessName}"/>
