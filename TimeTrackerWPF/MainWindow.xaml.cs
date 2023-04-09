@@ -1,128 +1,90 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using TimeTrackerWPF.src;
+using System.Windows.Forms;
+using System.IO;
+using System.Reflection;
+using System.Drawing;
+using System.Diagnostics.CodeAnalysis;
 
 namespace TimeTrackerWPF
 {
     public partial class MainWindow
     {
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool IsIconic(IntPtr hWnd);
+        Class c = new Class();
+        FullTime fullTime = new FullTime();
 
-        //List that stores all the necessary processes
-        private List<CurrentProcess> _old = new List<CurrentProcess>();
-
-        //List of exceptions
-        private readonly List<string> _exceptions = new List<string>
-        {
-            "ApplicationFrameHost",
-            "TextInputHost",
-            "SystemSettings"
-        };
-
+        [RequiresAssemblyFiles()]
         public MainWindow()
-        {
-            InitializeComponent();
-            UpdateProcess();
-        }
-
-        //Update list of process
-        private async void UpdateProcess()
         {
             try
             {
-                while (true)
-                {
-                    var all = Process.GetProcesses();
-                    var recent = (from item in all where IsCorrect(item) select new CurrentProcess(item.MainWindowTitle, item.ProcessName)).ToList();
+                InitializeComponent();
+                Hide();
+                ShowProcesses();
+                ShowFullTime();
 
-                    var allCorrect = _old.Concat(recent).ToList();
-                    var current = allCorrect.Distinct().ToList();
-                    _old = current;
-
-                    var doesntRepeat = allCorrect.Where(item => allCorrect.IndexOf(item) == allCorrect.LastIndexOf(item)).ToList();
-
-                    var repeats = allCorrect.Except(doesntRepeat).ToList();
-
-                    foreach (var item in repeats)
-                    {
-                        var time = new DateTime();
-                        if (item.StringTime != null)
-                        {
-                            time = DateTime.Parse(item.StringTime);
-                        }
-                        time = time.AddSeconds(1);
-                        item.StringTime = time.ToString("HH:mm:ss");
-                    }
-
-                    //Update listview
-                    ListViewProcess.ItemsSource = current;
-                    await Task.Delay(1000);
-                }
+                NotifyIcon ni = new NotifyIcon();
+                ni.Icon = System.Drawing.Icon.ExtractAssociatedIcon(AppDomain.CurrentDomain.BaseDirectory + "/TimeTracker.exe");
+                ni.Visible = true;
+                ni.Text = "TimeTracker";
+                ni.DoubleClick += new EventHandler(ShowApp);
+                ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Выйти");
+                var contextMenuStrip = new ContextMenuStrip();
+                contextMenuStrip.Items.Add(exitMenuItem);
+                ni.ContextMenuStrip = contextMenuStrip;
+                exitMenuItem.Click += CloseApp;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                MessageBox.Show($"Something went wrong. App will be closed in 10 seconds. If the problem persists, write to me on github, attaching the error code: \n{e}");
-                Thread.Sleep(10000);
-                Close();
+                System.Windows.MessageBox.Show(ex.Message);
             }
-            
+
+
         }
 
-        private bool IsCorrect(Process item)
+        private async void ShowProcesses()
         {
-            return item.MainWindowHandle.ToInt32() != 0 && item.MainWindowTitle != "" &&
-                   !IsIconic(item.MainWindowHandle) && !_exceptions.Contains(item.ProcessName);
+            while (true)
+            {
+                var list = c.Action();
+                ListViewProcess.ItemsSource = list;
+                await Task.Delay(1000);
+            }
         }
 
-        private void Close(object sender, RoutedEventArgs e)
+        private async void ShowFullTime()
         {
-            Visibility = Visibility.Collapsed;
+            while (true) 
+            {
+                fullTime.IncreaseTime(1);
+                FullTimeText.Content = fullTime.FullTimeStringValue;
+                await Task.Delay(1000);
+            }
         }
 
-        private void Open(object sender, RoutedEventArgs e)
+        private void HideApp(object sender, RoutedEventArgs e)
         {
-            Visibility = Visibility.Visible;
+            Hide();
         }
 
-        private void Exit(object sender, RoutedEventArgs e)
+        private void ShowApp(object Sender, EventArgs e)
+        {
+            Show();
+        }
+
+        void CloseApp(object sender, EventArgs e)
         {
             Close();
         }
-    }
-    
-    public class CurrentProcess
-    {
-        public string? ProcessName { get; set; }
-        public int Id { get; }
-        public string? StringTime { get; set; }
 
-        public CurrentProcess(string? processName, string id)
-        {
-            ProcessName = processName;
-            Id = id.GetHashCode();
-        }
-
-        public override bool Equals(object? obj)
-        {
-            if (obj == null || GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            var process = (CurrentProcess)obj;
-            return process.Id == Id;
-        }
-
-        public override int GetHashCode()
-        {
-            return Id;
-        }
     }
 }
