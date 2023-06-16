@@ -1,25 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace TimeTrackerWPF.src
+namespace TimeTracker.src
 {
-    class CurrentProcess
+    public class CurrentProcess
     {
-        public string? ProcessName { get; set; }
-        public int Id { get; }
+        public string ProcessName { get; set; }
+        public string ShownProcessName { get; set; }
         public string? StringTime { get; set; }
         public DateTime Time { get; set; }
-        public ImageSource? AppIcon { get; set; }
+        public ImageSource AppIcon { get; set; }
+        public bool IsExpanded { get; set; }
 
-        public CurrentProcess(string? processName, int id, ImageSource? appIcon)
+        public CurrentProcess(string processName, ImageSource appIcon)
         {
             ProcessName = processName;
-            Id = id;
+            if (processName.Length > 70)
+            {
+                ShownProcessName = processName.Substring(0, 70) + "...";
+            }
+            else
+            {
+                ShownProcessName = processName;
+            }
             if (String.IsNullOrEmpty(StringTime))
             {
                 IncreaseTime(1);
@@ -29,10 +36,11 @@ namespace TimeTrackerWPF.src
 
         public void IncreaseTime(int seconds)
         {
-            Time = Time.AddSeconds(seconds);
-            if (Time.Minute < 1) StringTime = "< 1 мин";
-            else if (Time.Hour < 1) StringTime = Time.ToString("m мин");
-            else StringTime = Time.ToString("H ч m мин");
+            Time = Time.AddSeconds(1);
+
+            if (Time.Minute < 1 && Time.Hour < 1) StringTime = "< 1 мин.";
+            else if (Time.Hour < 1) StringTime = Time.ToString("mмин.");
+            else if(Time.Hour >= 1 || Time.Day >= 1) StringTime = Time.ToString("Hч. mмин.");
         }
 
         public override bool Equals(object? obj)
@@ -43,12 +51,12 @@ namespace TimeTrackerWPF.src
             }
 
             var process = (CurrentProcess)obj;
-            return process.Id == Id;
+            return process.ProcessName == ProcessName;
         }
 
         public override int GetHashCode()
         {
-            return Id;
+            return ProcessName.GetHashCode();
         }
     }
 }

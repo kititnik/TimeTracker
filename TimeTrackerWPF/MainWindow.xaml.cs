@@ -14,49 +14,48 @@ using System.IO;
 using System.Reflection;
 using System.Drawing;
 using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel;
+using System.Windows.Controls;
+using TimeTracker.src;
 
 namespace TimeTrackerWPF
 {
     public partial class MainWindow
     {
-        Class c = new Class();
+        SelectProcesses selectProcesses = new SelectProcesses();
         FullTime fullTime = new FullTime();
+        private bool close = false;
 
         [RequiresAssemblyFiles()]
         public MainWindow()
         {
-            try
-            {
-                InitializeComponent();
-                Hide();
-                ShowProcesses();
-                ShowFullTime();
+            InitializeComponent();
+            Hide();
+            ShowProcesses();
+            ShowFullTime();
 
-                NotifyIcon ni = new NotifyIcon();
-                ni.Icon = System.Drawing.Icon.ExtractAssociatedIcon(AppDomain.CurrentDomain.BaseDirectory + "/TimeTracker.exe");
-                ni.Visible = true;
-                ni.Text = "TimeTracker";
-                ni.DoubleClick += new EventHandler(ShowApp);
-                ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Выйти");
-                var contextMenuStrip = new ContextMenuStrip();
-                contextMenuStrip.Items.Add(exitMenuItem);
-                ni.ContextMenuStrip = contextMenuStrip;
-                exitMenuItem.Click += CloseApp;
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show(ex.Message);
-            }
-
-
+            NotifyIcon ni = new NotifyIcon();
+            ni.Icon = System.Drawing.Icon.ExtractAssociatedIcon(AppDomain.CurrentDomain.BaseDirectory + "/TimeTracker.exe");
+            ni.Visible = true;
+            ni.Text = "TimeTracker";
+            ni.DoubleClick += new EventHandler(ShowApp!);
+            ToolStripMenuItem exitMenuItem = new ToolStripMenuItem("Выйти");
+            var contextMenuStrip = new ContextMenuStrip();
+            contextMenuStrip.Items.Add(exitMenuItem);
+            ni.ContextMenuStrip = contextMenuStrip;
+            exitMenuItem.Click += CloseApp!;
         }
 
         private async void ShowProcesses()
         {
             while (true)
             {
-                var list = c.Action();
-                ListViewProcess.ItemsSource = list;
+                var list = selectProcesses.Action();
+                ProcessesTree.Items.Clear();
+                foreach (var item in list)
+                {
+                    ProcessesTree.Items.Add(item);
+                }
                 await Task.Delay(1000);
             }
         }
@@ -71,7 +70,7 @@ namespace TimeTrackerWPF
             }
         }
 
-        private void HideApp(object sender, RoutedEventArgs e)
+        private void HideApp()
         {
             Hide();
         }
@@ -83,8 +82,19 @@ namespace TimeTrackerWPF
 
         void CloseApp(object sender, EventArgs e)
         {
+            close = true;
             Close();
         }
 
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if(close) { base.OnClosing(e); }
+            else 
+            {
+                e.Cancel = true;
+                HideApp();
+            }
+            
+        }
     }
 }

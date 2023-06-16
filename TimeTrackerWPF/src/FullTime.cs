@@ -10,7 +10,7 @@ namespace TimeTrackerWPF.src
     {
         public DateTime FullTimeValue { get; set; }
         public string? FullTimeStringValue { get; set; }
-        Class c = new Class();
+        SelectProcesses c = new SelectProcesses();
 
         public FullTime()
         {

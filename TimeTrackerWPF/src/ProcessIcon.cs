@@ -12,7 +12,7 @@ namespace TimeTrackerWPF.src
 {
     class ProcessIcon
     {
-        public static ImageSource? GetIcon(string? path, bool smallIcon, bool isDirectory)
+        public static ImageSource? GetIcon(string path, bool smallIcon, bool isDirectory)
         {
             // SHGFI_USEFILEATTRIBUTES takes the file name and attributes into account if it doesn't exist
             uint flags = SHGFI_ICON | SHGFI_USEFILEATTRIBUTES;
