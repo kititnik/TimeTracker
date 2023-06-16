@@ -15,6 +15,7 @@ using System.Windows;
 using TimeTracker.src;
 using System.Management;
 using System.Drawing.Design;
+using System.ComponentModel;
 
 namespace TimeTrackerWPF.src
 {
@@ -42,15 +43,8 @@ namespace TimeTrackerWPF.src
 
             foreach (var item in all)
             {
-                try
-                {
-                    if (!IsCorrect(item)) continue;
-                    correctProcesses.Add(item);
-                }
-                catch (Exception)
-                {
-                    continue;
-                }
+                if (!IsCorrect(item)) continue;
+                correctProcesses.Add(item);
             }
             return correctProcesses;
         }
@@ -60,37 +54,29 @@ namespace TimeTrackerWPF.src
             var currentProcesses = new List<MainProcess>();
             foreach (var item in correctProcesses)
             {
-                try
+                var oldProcess = currentProcesses.FirstOrDefault(p => p.ProcessName == item.MainModule?.FileVersionInfo.FileDescription);
+                if (oldProcess != null) continue;
+                else
                 {
-                    var oldProcess = currentProcesses.FirstOrDefault(p => p.ProcessName == item.MainModule?.FileVersionInfo.FileDescription);
-                    if (oldProcess != null) continue;
+                    var last = _lastCurrentProcesses.FirstOrDefault(p => p.ProcessName == item.MainModule?.FileVersionInfo.FileDescription);
+                    if (last != null)
+                    {
+                        last.IncreaseTime(1);
+                        UpdateSubProcesses(item, last);
+                        currentProcesses.Add(last);
+                    }
                     else
                     {
-                        var last = _lastCurrentProcesses.FirstOrDefault(p => p.ProcessName == item.MainModule?.FileVersionInfo.FileDescription);
-                        if (last != null)
-                        {
-                            last.IncreaseTime(1);
-                            UpdateSubProcesses(item, last);
-                            currentProcesses.Add(last);
-                        }
-                        else
-                        {
-                            //Set icon and name
-                            ImageSource appIcon = ProcessIcon.GetIcon(item.MainModule!.FileName!, false, false)!;
-                            string name = item.MainModule.FileVersionInfo.FileDescription!;
-                            //Find sub processes
-                            var subProcesses = new List<SubProcess>();
-                            var currentProcess = new MainProcess(name, appIcon, subProcesses);
-                            UpdateSubProcesses(item, currentProcess);
-                            currentProcesses.Add(currentProcess);
-                        }
+                        //Set icon and name
+                        ImageSource appIcon = ProcessIcon.GetIcon(item.MainModule!.FileName!, false, false)!;
+                        string name = item.MainModule.FileVersionInfo.FileDescription!;
+                        //Find sub processes
+                        var subProcesses = new List<SubProcess>();
+                        var currentProcess = new MainProcess(name, appIcon, subProcesses);
+                        UpdateSubProcesses(item, currentProcess);
+                        currentProcesses.Add(currentProcess);
                     }
                 }
-                catch (Exception)
-                {
-                    continue;
-                }
-                
             }
             return currentProcesses;
         }
@@ -117,8 +103,15 @@ namespace TimeTrackerWPF.src
 
         private bool IsCorrect(Process item)
         {
-            return item.MainWindowHandle.ToInt32() != 0 && !String.IsNullOrEmpty(item.MainModule?.FileVersionInfo.FileDescription) &&
+            try
+            {
+                return item.MainWindowHandle.ToInt32() != 0 && !String.IsNullOrEmpty(item.MainModule?.FileVersionInfo.FileDescription) &&
                    !IsIconic(item.MainWindowHandle) && !Constants.Exceptions.Contains(item.ProcessName);
+            }
+            catch (Win32Exception) 
+            {
+                return false;
+            }
         }
     }
 }

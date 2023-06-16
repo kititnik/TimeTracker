@@ -56,7 +56,7 @@ namespace TimeTrackerWPF
                 {
                     ProcessesTree.Items.Add(item);
                 }
-                await Task.Delay(1000);
+                await Task.Delay(src.Constants.DelayInMilliseconds);
             }
         }
 
@@ -66,7 +66,7 @@ namespace TimeTrackerWPF
             {
                 fullTime.IncreaseTime(1);
                 FullTimeText.Content = fullTime.FullTimeStringValue;
-                await Task.Delay(1000);
+                await Task.Delay(src.Constants.DelayInMilliseconds);
             }
         }
 

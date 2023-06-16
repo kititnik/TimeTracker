@@ -19,5 +19,6 @@ namespace TimeTrackerWPF.src
             "explorer",
             "CalculatorApp"
         };
+        public static readonly int DelayInMilliseconds = 1000;
     }
 }
