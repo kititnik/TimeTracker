@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TimeTrackerWPF.src
+namespace TimeTracker.src
 {
     class FullTime
     {
         public DateTime FullTimeValue { get; set; }
         public string? FullTimeStringValue { get; set; }
-        SelectProcesses c = new SelectProcesses();
+        ProcessesList c = new ProcessesList();
 
         public FullTime()
         {
@@ -19,11 +19,8 @@ namespace TimeTrackerWPF.src
 
         public void IncreaseTime(int seconds)
         {
-            if(c.SelectCorrectProcesses().Count > 0)
-            {
-                FullTimeValue = FullTimeValue.AddSeconds(seconds);
-                FullTimeStringValue = FullTimeValue.ToString("HH:mm:ss");
-            }
+            FullTimeValue = FullTimeValue.AddSeconds(seconds);
+            FullTimeStringValue = FullTimeValue.ToString("HH:mm:ss");
         }
     }
 }

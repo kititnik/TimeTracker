@@ -8,7 +8,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
 
-namespace TimeTrackerWPF.src
+namespace TimeTracker.src
 {
     class ProcessIcon
     {

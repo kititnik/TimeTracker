@@ -1,28 +1,17 @@
-﻿using Microsoft.VisualBasic;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using TimeTrackerWPF.src;
-using System.Windows.Forms;
-using System.IO;
-using System.Reflection;
-using System.Drawing;
-using System.Diagnostics.CodeAnalysis;
 using System.ComponentModel;
-using System.Windows.Controls;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using TimeTracker.src;
 
 namespace TimeTrackerWPF
 {
     public partial class MainWindow
     {
-        SelectProcesses selectProcesses = new SelectProcesses();
+        ProcessesList processesList = new ProcessesList();
         FullTime fullTime = new FullTime();
         private bool close = false;
 
@@ -30,10 +19,13 @@ namespace TimeTrackerWPF
         public MainWindow()
         {
             InitializeComponent();
+            SetUpContextMenu();
             Hide();
             ShowProcesses();
-            ShowFullTime();
+        }
 
+        private void SetUpContextMenu()
+        {
             NotifyIcon ni = new NotifyIcon();
             ni.Icon = System.Drawing.Icon.ExtractAssociatedIcon(AppDomain.CurrentDomain.BaseDirectory + "/TimeTracker.exe");
             ni.Visible = true;
@@ -50,24 +42,38 @@ namespace TimeTrackerWPF
         {
             while (true)
             {
-                var list = selectProcesses.Action();
-                ProcessesTree.Items.Clear();
-                foreach (var item in list)
+                var originalProcesses = FindCorrectProcesses();
+                if (originalProcesses.Count > 0)
                 {
-                    ProcessesTree.Items.Add(item);
+                    processesList.Update(originalProcesses);
+                    ProcessesTree.Items.Clear();
+                    foreach (var item in processesList)
+                    {
+                        ProcessesTree.Items.Add(item);
+                    }
+                    IncreaseFullTime();
                 }
-                await Task.Delay(src.Constants.DelayInMilliseconds);
+                await Task.Delay(Constants.DelayInMilliseconds);
             }
         }
 
-        private async void ShowFullTime()
+        private void IncreaseFullTime()
         {
-            while (true) 
+            fullTime.IncreaseTime(Constants.DelayInMilliseconds / 1000);
+            FullTimeText.Content = fullTime.FullTimeStringValue;
+        }
+
+        public List<Process> FindCorrectProcesses()
+        {
+            var allProcesses = Process.GetProcesses();
+            var correctProcesses = new List<Process>();
+
+            foreach (var process in allProcesses)
             {
-                fullTime.IncreaseTime(1);
-                FullTimeText.Content = fullTime.FullTimeStringValue;
-                await Task.Delay(src.Constants.DelayInMilliseconds);
+                if (!process.IsCorrect()) continue;
+                correctProcesses.Add(process);
             }
+            return correctProcesses;
         }
 
         private void HideApp()
